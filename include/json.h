@@ -59,6 +59,7 @@ typedef struct {
 
     // Sensor configuration
     sensors_config sc;
+
 } json_config;
 
 /**

@@ -86,7 +86,7 @@ bool RS485_recv(uint8_t rx_buffer[], uint16_t *size, uint32_t timeout)
 
   if (*size != 0)
   {
-    RS485_STREAM.read(rx_buffer, *size);
+    RS485_STREAM.readBytes(rx_buffer, *size);
     rx_buffer[*size] = 0;
   }
 

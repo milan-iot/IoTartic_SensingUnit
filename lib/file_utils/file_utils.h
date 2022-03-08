@@ -62,9 +62,4 @@ void FS_deleteFile(fs::FS &fs, const char * path);
  **/
 bool FS_setup();
 
-/**
- * Utility function that tests other functions
- **/
-void FS_test();
-
 #endif

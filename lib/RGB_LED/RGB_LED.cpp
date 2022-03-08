@@ -1,4 +1,4 @@
-#include "LED.h"
+#include "RGB_LED.h"
 
 const uint16_t PixelCount = 1;
 const uint8_t PixelPin = 5;
@@ -6,17 +6,17 @@ uint8_t colorSaturation = 255;
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PixelCount, PixelPin);
 
-void LED_init(void)
+void RGB_LED_init(void)
 {
   strip.Begin();
 }
 
-void LED_setSaturation(uint8_t saturation)
+void RGB_LED_setSaturation(uint8_t saturation)
 {
   colorSaturation = saturation;
 }
 
-void LED_setColor(LED_COLOR color)
+void RGB_LED_setColor(RGB_LED_COLOR color)
 {
   switch (color)
   {

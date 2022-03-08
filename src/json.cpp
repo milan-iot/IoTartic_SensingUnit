@@ -154,53 +154,15 @@ bool getJsonConfig(json_config *jc, DynamicJsonDocument *config)
     {
         jc->sc.number_of_sensors_bytes = 0;
 
-        uint8_t air_temperature_present = (*config)["sensors"]["air_temperature"];
-        if(air_temperature_present == 1)
-            jc->sc.air_temp = true;
-        else
-            jc->sc.air_temp = false;
-
-        uint8_t air_humidity_present = (*config)["sensors"]["air_humidity"];
-        if(air_humidity_present == 1)
-            jc->sc.air_hum = true;
-        else
-            jc->sc.air_hum = false;
-
-        uint8_t air_pressure_present = (*config)["sensors"]["air_pressure"];
-        if(air_pressure_present == 1)
-            jc->sc.air_pres = true;
-        else
-            jc->sc.air_pres = false;
-
-        uint8_t soil_temperature_1_present = (*config)["sensors"]["soil_temperature_1"];
-        if(soil_temperature_1_present == 1)
-            jc->sc.soil_temp_1 = true;
-        else
-            jc->sc.soil_temp_1 = false;
-
-        uint8_t soil_temperature_2_present = (*config)["sensors"]["soil_temperature_2"];
-        if(soil_temperature_2_present == 1)
-            jc->sc.soil_temp_2 = true;
-        else
-            jc->sc.soil_temp_2 = false;
-
-        uint8_t soil_moisture_1_present = (*config)["sensors"]["soil_moisture_1"];
-        if(soil_moisture_1_present == 1)
-            jc->sc.soil_moist_1 = true;
-        else
-            jc->sc.soil_moist_1 = false;
-
-        uint8_t soil_moisture_2_present = (*config)["sensors"]["soil_moisture_2"];
-        if(soil_moisture_2_present == 1)
-            jc->sc.soil_moist_2 = true;
-        else
-            jc->sc.soil_moist_2 = false;
-
-        uint8_t luminosity_present = (*config)["sensors"]["luminosity"];
-        if(luminosity_present == 1)
-            jc->sc.lum = true;
-        else
-            jc->sc.lum = false;
+        jc->sc.air_temp = (*config)["sensors"]["air_temperature"];
+        jc->sc.air_hum = (*config)["sensors"]["air_humidity"];
+        jc->sc.air_pres = (*config)["sensors"]["air_pressure"];
+        jc->sc.soil_temp_1 = (*config)["sensors"]["soil_temperature_1"];
+        jc->sc.soil_temp_2 = (*config)["sensors"]["soil_temperature_2"];
+        jc->sc.soil_moist_1 = (*config)["sensors"]["soil_moisture_1"];
+        jc->sc.soil_moist_2 = (*config)["sensors"]["soil_moisture_2"];
+        jc->sc.lum = (*config)["sensors"]["luminosity"];
+        jc->sc.air_sensor = (*config)["on_board_ics"]["air_sensor"];
 
         calculateNumberOfSensorsBytes(&jc->sc);
     }

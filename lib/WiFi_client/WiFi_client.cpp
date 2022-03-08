@@ -1,6 +1,7 @@
-#include <Arduino.h>
 #include "WiFi_client.h"
-#include "LED.h"
+
+#include <Arduino.h>
+#include <RGB_LED.h>
 
 #include <WiFi.h>
 #include <WiFiMulti.h>
@@ -36,9 +37,9 @@ void WiFi_setup(const char* ssid, const char* pass)
   {
     if (WIFI_debug_enable)
       Serial.print('.');
-    LED_setColor(CYAN);
+    RGB_LED_setColor(CYAN);
     delay(100);
-    LED_setColor(BLACK);
+    RGB_LED_setColor(BLACK);
     if (--num_of_attempts == 0)
       break;
   } while (!(wifiMulti.run() == WL_CONNECTED));
@@ -47,7 +48,7 @@ void WiFi_setup(const char* ssid, const char* pass)
   {
     Serial.println(" OK!");
     Serial.print("IP address: "); 
-    LED_setColor(CYAN);
+    RGB_LED_setColor(CYAN);
   }
 
   // Print ESP32 Local IP Address
@@ -55,7 +56,7 @@ void WiFi_setup(const char* ssid, const char* pass)
   {
     Serial.println(WiFi.localIP());
     delay(1000);
-    LED_setColor(BLACK);
+    RGB_LED_setColor(BLACK);
   }
 }
 

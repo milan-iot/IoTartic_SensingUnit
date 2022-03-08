@@ -1,20 +1,19 @@
 #include <Arduino.h>
+#include <WiFi.h>
+#include <ArduinoJson.h>
 #include "esp_bt_main.h"
 #include "esp_bt_device.h"
 
-#include <WiFi.h>
-#include <ArduinoJson.h>
-
+#include <RGB_LED.h>
+#include <RS485.h>
+#include <WiFi_client.h>
+#include <BLE_server.h>
+#include <file_utils.h>
+#include <crypto_utils.h>
 #include "sensors.h"
-#include "RS485.h"
-#include "BLE_server.h"
-#include "LED.h"
-#include "file_utils.h"
-#include "WiFi_client.h"
 #include "sdu.h"
 #include "ldu.h"
 #include "json.h"
-#include "crypto_utils.h"
 #include <mbedtls/md.h>
 
 json_config jc;
@@ -76,7 +75,7 @@ void WiFi_loop()
   //LED_setSaturation(32);
   while (1)
   {
-    LED_setColor(BLUE);
+    RGB_LED_setColor(BLUE);
 
     SDU_debugEnable(true);
 
@@ -87,7 +86,7 @@ void WiFi_loop()
     printSensorData(&sd, &jc.sc);
 
     if(!convertToSensorDataArray(&packet[7], 256-7, &packet_len, &sd, &jc.sc))
-      Serial.println("Converting failed");
+      Serial.println("Conversion failed");
     
     packet[6] = packet_len;
     packet_len += 7;
@@ -95,7 +94,7 @@ void WiFi_loop()
     uint8_t ret = SDU_sendData(&comm_params, packet, packet_len);
     SDU_debugPrintError(ret);
 
-    LED_setColor(BLACK);
+    RGB_LED_setColor(BLACK);
 
     delay(5*60*1000);
   }
@@ -104,10 +103,10 @@ void WiFi_loop()
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("--- Sensing Unit ---");  
+  Serial.println("--- IoTartic Sensing Unit ---");  
     
-  LED_init();
-  LED_setSaturation(255);
+  RGB_LED_init();
+  RGB_LED_setSaturation(255);
 
   FS_setup();
   
@@ -125,22 +124,23 @@ void setup()
 
   while(jc.device_type != SENSOR)
   {
-    Serial.println("Device not configured for sensor type!");
+    Serial.println("Device not configured as sensor type!");
     delay(1000);
   }
 
+  Serial.print("WiFi ssid: ");
   Serial.println(jc.wifi_ssid);
+  Serial.print("WiFi pass: ");
   Serial.println(jc.wifi_pass);
-
-  while(1);
-
+  
   initSensors(&jc.sc);
+  //while(1);
 
   if (jc.standalone)
   {
     if (jc.server_tunnel == WIFI)
     {
-      Serial.println("WIFI server communication");
+      Serial.println("WiFi server communication");
 
       uint8_t ret;
       
@@ -156,10 +156,7 @@ void setup()
       {
         memcpy(topic_to_subscribe, jc.subscribe_topic, strlen(jc.subscribe_topic));
         for(uint8_t i= 0; i < 6; i++)
-        {
-            char str[3];
             sprintf(topic_to_subscribe + strlen(jc.subscribe_topic) + 2*i, "%02x", (int)gateaway_mac[i]);
-        }
         topic_to_subscribe[strlen(jc.subscribe_topic) + 12] = 0;
         SDU_setMQTTparams(&comm_params, jc.client_id, jc.publish_topic, topic_to_subscribe);
       }
@@ -213,10 +210,10 @@ void loop()
   uint16_t header;
   if(packet_len != 0)
   {
-    Serial.println("LEN good");
+    Serial.println("LEN OK");
     if(LDU_parsePacket(&loc_comm_params, packet, packet_len, &header) == LDU_OK)
     {
-      Serial.println("Parse good");
+      Serial.println("Parse OK");
       if (header == SENSOR_MAC_ADDRESS_REQUEST_HEADER)
       {
         Serial.println("MAC REQ");

@@ -15,7 +15,7 @@
 #include <mbedtls/md.h>
 
 #include "BLE_server.h"
-#include "LED.h"
+#include <RGB_LED.h>
 #include "file_utils.h"
 
 BLECharacteristic *pCharacteristic;
@@ -29,18 +29,18 @@ class MyServerCallbacks: public BLEServerCallbacks
     void onConnect(BLEServer* pServer) 
     {
       Serial.println("BLE Connected");
-      LED_setColor(BLUE);
+      RGB_LED_setColor(BLUE);
       delay(1000);
-      LED_setColor(BLACK);
+      RGB_LED_setColor(BLACK);
     };
 
     void onDisconnect(BLEServer* pServer) 
     {
       Serial.println("BLE Disconnected");
       BLEDevice::startAdvertising();
-      LED_setColor(PURPLE);
+      RGB_LED_setColor(PURPLE);
       delay(200);
-      LED_setColor(BLACK);
+      RGB_LED_setColor(BLACK);
     }
 };
 
@@ -49,18 +49,18 @@ class MyCallbacks: public BLECharacteristicCallbacks
   void onRead(BLECharacteristic *pCharacteristic) 
   {
     Serial.println("BLE Read");
-    LED_setColor(GREEN);
+    RGB_LED_setColor(GREEN);
     delay(200);
-    LED_setColor(BLACK);
+    RGB_LED_setColor(BLACK);
   }
   
   void onWrite(BLECharacteristic *pCharacteristic) 
   {
     Serial.println("BLE Write");
     data_received_flag = true;
-    LED_setColor(RED);
+    RGB_LED_setColor(RED);
     delay(200);
-    LED_setColor(BLACK);
+    RGB_LED_setColor(BLACK);
   }
 };
 

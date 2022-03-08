@@ -4,59 +4,37 @@
 #include <ArduinoJson.h>
 
 /// Sensor types
-typedef enum {AIR_TEMPERATURE = 0x00,
-              AIR_HUMIDITY = 0x01,
-              AIR_PRESSURE = 0x02,
-              SOIL_TEMPERATURE_1 = 0x03,
-              SOIL_TEMPERATURE_2 = 0x04,
-              SOIL_MOISTURE_1 = 0x05,
-              SOIL_MOISTURE_2 = 0x06,
-              LUMINOSITY = 0x07,
-              ERROR = -1
-              } sensor_type;
+typedef enum {
+  AIR_TEMPERATURE = 0x00,
+  AIR_HUMIDITY = 0x01,
+  AIR_PRESSURE = 0x02,
+  SOIL_TEMPERATURE_1 = 0x03,
+  SOIL_TEMPERATURE_2 = 0x04,
+  SOIL_MOISTURE_1 = 0x05,
+  SOIL_MOISTURE_2 = 0x06,
+  LUMINOSITY = 0x07,
+  ERROR = -1
+} sensor_type;
+
+/// Sensor ICs
+typedef enum {
+  IC_BME280 = 1, IC_BME680
+} air_sensor_ic;
 
 /// Number of bytes for sensor header
 #define HEADER_SIZE 1
-/// Air temperature sensor header
-#define AIR_TEMPERATURE_HEADER 0x00
-/// Air humidity sensor header
-#define AIR_HUMIDITY_HEADER 0x01
-/// Air pressure sensor header
-#define AIR_PRESSURE_HEADER 0x02
-/// Soil temperature 1 sensor header
-#define SOIL_TEMPERATURE_1_HEADER 0x03
-/// Soil temperature 2 sensor header
-#define SOIL_TEMPERATURE_2_HEADER 0x04
-/// Soil moisture 1 sensor header
-#define SOIL_MOISTURE_1_HEADER 0x05
-/// Soil moisture 2 sensor header
-#define SOIL_MOISTURE_2_HEADER 0x06
-/// Luminosity sensor header
-#define LUMINOSITY_HEADER 0x07
 
-/// Number of bytes for air temperature sensor value
-#define AIR_TEMPERATURE_SIZE 2
-/// Number of bytes for air humidity sensor value
-#define AIR_HUMIDITY_SIZE 2
-/// Number of bytes for air pressure sensor value
-#define AIR_PRESSURE_SIZE 4
-/// Number of bytes for soil temperature 1 sensor value
-#define SOIL_TEMPERATURE_1_SIZE 2
-/// Number of bytes for soil temperature 2 sensor value
-#define SOIL_TEMPERATURE_2_SIZE 2
-/// Number of bytes for soil moisture 1 sensor value
-#define SOIL_MOISTURE_1_SIZE 1
-/// Number of bytes for soil moisture 2 sensor value
-#define SOIL_MOISTURE_2_SIZE 1
-/// Number of bytes for luminosity sensor value
-#define LUMINOSITY_SIZE 2
-
+//https://stackoverflow.com/questions/3553296/sizeof-single-struct-member-in-c
+#define member_size(type, member) sizeof(((type *)0)->member)
 
 /// Configuration structure for enabled sensors
 typedef struct sensors_config
 {
   // Number of bytes required for enabled sensors
   uint8_t number_of_sensors_bytes;
+
+  //air sensor IC
+  air_sensor_ic air_sensor;
 
   // Air parameters
   bool air_temp;
@@ -92,7 +70,7 @@ typedef struct sensor_data
 } sensor_data;
 
 /**
- * Function that resets sc strucutre, disableing all sensors
+ * Function that resets sc strucutre, disabling all sensors
  * @param sc - Sensor configuration structure
  * @return No return value
  **/
