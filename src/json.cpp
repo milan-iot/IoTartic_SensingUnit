@@ -154,6 +154,15 @@ bool getJsonConfig(json_config *jc, DynamicJsonDocument *config)
     {
         jc->sc.number_of_sensors_bytes = 0;
 
+        const char* _air_sensor_ic = (*config)["sensors"]["air_sensor_ic"];
+        String air_sensor_ic_s = String(_air_sensor_ic);
+        if (air_sensor_ic_s == "BME280")
+            jc->sc.air_sensor = IC_BME280;
+        else if (air_sensor_ic_s == "BME680")
+            jc->sc.air_sensor = IC_BME680;
+        else
+            return false;
+
         jc->sc.air_temp = (*config)["sensors"]["air_temperature"];
         jc->sc.air_hum = (*config)["sensors"]["air_humidity"];
         jc->sc.air_pres = (*config)["sensors"]["air_pressure"];
@@ -162,7 +171,6 @@ bool getJsonConfig(json_config *jc, DynamicJsonDocument *config)
         jc->sc.soil_moist_1 = (*config)["sensors"]["soil_moisture_1"];
         jc->sc.soil_moist_2 = (*config)["sensors"]["soil_moisture_2"];
         jc->sc.lum = (*config)["sensors"]["luminosity"];
-        jc->sc.air_sensor = (*config)["on_board_ics"]["air_sensor"];
 
         calculateNumberOfSensorsBytes(&jc->sc);
     }

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include "RS485.h"
-#include "BLE_server.h"
+#include "BLE_client.h"
 #include "CRC32.h"
 #include "crypto_utils.h"
 
@@ -41,12 +41,14 @@ typedef struct
 #define SERVER_ERROR(x) (SERVER_ERROR_BASE + x)
 #define LOCAL_ERROR(x) (LOCAL_ERROR_BASE + x)
  
-#define SERVER_ERROR_BASE              0xD0
-#define LOCAL_ERROR_BASE               0xE0
+#define SERVER_ERROR_BASE                   0xD0
+#define LOCAL_ERROR_BASE                    0xE0
  
-#define INVALID_HEADER                0x00
-#define INVALID_NUM_OF_BYTES          0x01
-#define INTEGRITY_ERROR               0x02
+#define INVALID_HEADER                      0x00
+#define INVALID_NUM_OF_BYTES                0x01
+#define INTEGRITY_ERROR                     0x02
+#define DATA_TRANSFER_ERROR                 0x03
+#define SUCCESS                             0xcc
 
 /// CRC polynomial value definition
 #define CRC32_DEFAULT_VALUE                 0x04C11DB7
@@ -54,6 +56,7 @@ typedef struct
 /// LDU core headers
 #define SENSOR_MAC_ADDRESS_REQUEST_HEADER   0x4D52
 #define SENSOR_DATA_REQUEST_HEADER          0x4452
+#define CORE_RESPONSE_HEADER                0x4352
 
 // LDU sensor headers
 #define SENSOR_MAC_ADDRESS_VALUE_HEADER     0x4D56

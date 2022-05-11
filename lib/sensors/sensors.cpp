@@ -80,11 +80,11 @@ void initSensors(sensors_config *sc)
     LightSensor.begin();
 
   if(sc->air_hum || sc->air_temp || sc->air_pres) 
-  {
+  {    
     switch (sc->air_sensor)
     {
       case IC_BME280:
-        Serial.print(F("BME280 init..."));
+        Serial.println(F("BME280 init..."));
         Wire.begin();
         bme280.setI2CAddress(0x76);
         if(bme280.beginI2C()) 
@@ -111,6 +111,8 @@ void initSensors(sensors_config *sc)
           Serial.print(F("FAIL...\r\n"));
         }
         break;
+      default:
+        Serial.println("AIR SENSOR not present!");
     }
   }
 }
@@ -431,6 +433,11 @@ void printSensorData(sensor_data *sd, sensors_config *sc)
   if(sc->air_hum || sc->air_temp || sc->air_pres)
   {
     Serial.println("*** Air parameters ***");
+    if(sc->air_sensor == IC_BME280)
+      Serial.println("** BME280 **");
+    else if(sc->air_sensor == IC_BME680)
+      Serial.println("** BME680 **");
+
     if(sc->air_hum)
       Serial.println("\tH = " + String(sd->air_hum / 100) + "." + (String)(sd->air_hum % 100) + " \%");
     if(sc->air_temp)

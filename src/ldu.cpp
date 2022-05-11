@@ -54,6 +54,12 @@ uint8_t LDU_constructPacket(char *password,  uint16_t header_type, uint8_t *in_d
     memcpy(out_data + *out_data_len, (uint8_t *)&crc32, CRC32_LENGTH);
     *out_data_len += CRC32_LENGTH;
 
+    if (LDU_debug_enable)
+    {
+        Serial.print("CRC: ");
+        Serial.println(crc32, HEX);
+    }
+
     return LDU_OK;
 }
 
@@ -72,14 +78,17 @@ uint8_t LDU_parsePacket(LDU_struct *comm_params, uint8_t *input, uint16_t input_
     {
         case BLE:
             if(input_length < HEADER_LENGTH)
-                return SERVER_ERROR(INVALID_NUM_OF_BYTES);;
+                return LOCAL_ERROR(INVALID_NUM_OF_BYTES);
 
             *header = ((uint16_t) input[0] << 8) | input[1];
+
+            if(input[HEADER_LENGTH] != SUCCESS)
+                return LOCAL_ERROR(DATA_TRANSFER_ERROR);
         break;
 
         case RS485:
             if(input_length < HASH_LENGTH + HEADER_LENGTH)
-                return SERVER_ERROR(INVALID_NUM_OF_BYTES);;
+                return LOCAL_ERROR(INVALID_NUM_OF_BYTES);
 
             if(!LDU_checkDevicesHash(comm_params->devices_hmac, input))
                 return INVALID_AUTH;
@@ -130,7 +139,7 @@ uint8_t LDU_init(LDU_struct *comm_params)
     switch(comm_params->mode)
     {
         case BLE:
-            BLE_serverSetup(comm_params->serv_uuid, comm_params->char_uuid);
+            BLE_clientSetup(comm_params->serv_uuid, comm_params->char_uuid);
         break;
 
         case RS485:
@@ -149,6 +158,7 @@ uint8_t LDU_send(LDU_struct *comm_params, uint8_t packet[], uint16_t size)
     switch(comm_params->mode)
     {
         case BLE:
+            BLE_connectToServer();
             BLE_send(packet, size);
         break;
 
@@ -171,7 +181,8 @@ uint8_t LDU_recv(LDU_struct *comm_params, char rx_buffer[], uint16_t *size, uint
     switch(comm_params->mode)
     {
         case BLE:
-            BLE_recv(rx_buffer, size, timeout);
+            BLE_recv((uint8_t *)rx_buffer, size);
+            BLE_disconnectFromServer();
         break;
         
         case RS485:
