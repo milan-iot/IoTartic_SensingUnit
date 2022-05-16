@@ -16,8 +16,6 @@
 #include "json.h"
 #include <mbedtls/md.h>
 
-//#define REGISTER_MODE
-
 json_config jc;
 
 uint8_t packet[256];
@@ -37,49 +35,12 @@ uint8_t devices_hash[32];
 
 
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  300         /* Time ESP32 will go to sleep (in seconds) */
+#define TIME_TO_SLEEP  10         /* Time ESP32 will go to sleep (in seconds) */
 
 RTC_DATA_ATTR int bootCount = 0;
 
-void GetMacAddress()
-{
-  //https://techtutorialsx.com/2018/03/09/esp32-arduino-getting-the-bluetooth-device-address/
-  btStart();
-  esp_bluedroid_init();
-  esp_bluedroid_enable();
-
-  Serial.print("BLE MAC Address:  ");
-  const uint8_t* point = esp_bt_dev_get_address();
-  for (int i = 0; i < 6; i++)
-  { 
-    char str[3];
-   
-    sprintf(str, "%02X", (int)point[i]);
-    Serial.print(str);
-    if (i < 5)
-      Serial.print(":");
-    udp_packet[i] = point[i];
-  }
-  Serial.println();
-  
-  String mac = WiFi.macAddress();
-  
-  Serial.print("WiFi MAC Address: ");
-  Serial.println(mac);
-
-  for (int i = 0; i < 6; i++)
-  {
-    uint8_t hi, lo;
-    char c = mac.charAt(3 * i); 
-    hi = c > '9' ? c - 'A' + 10 : c - '0';
-    c = mac.charAt(3 * i + 1);
-    lo = c > '9' ? c - 'A' + 10 : c - '0';
-  }
-}
-
 void WiFi_loop()
 {
-  //LED_setSaturation(32);
   while (1)
   {
     RGB_LED_setColor(BLUE);
@@ -101,49 +62,21 @@ void WiFi_loop()
     uint8_t ret = SDU_sendData(&comm_params, packet, packet_len);
     SDU_debugPrintError(ret);
 
+    WiFi_disconnect();
+
     RGB_LED_setColor(BLACK);
 
-    delay(5*60*1000);
+    esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+    Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
+    " Seconds");
+
+    Serial.println("Going to sleep now");
+    Serial.flush(); 
+    esp_deep_sleep_start();
+    Serial.println("This will never be printed");
   }
 }
 
-#ifdef REGISTER_MODE
-void setup()
-{
-  Serial.begin(115200);
-
-  //delay(1000);
-
-  Serial.println("--- PRE ---");  
-  Serial.println("--- IoTartic Unit ---");  
-  Serial.println("--- POSLE ---");  
-
-  RGB_LED_init();
-  RGB_LED_setSaturation(255);
-
-  /*BLE_getMACStandalone(gateaway_mac);
-  for(uint16_t i = 0; i < 6; i++)
-    {
-      char str[3];
-      sprintf(str, "%02x", (int)gateaway_mac[i]);
-      DEBUG_STREAM.print(str);
-    }
-    DEBUG_STREAM.println();
-}*/
-
-GetMacAddress();
-
-}
-
-void loop()
-{
-
-}
-
-
-#endif
-
-#ifndef REGISTER_MODE
 void setup()
 {
   delay(5000);
@@ -284,46 +217,3 @@ void loop()
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
 }
-
-/*
-void loop()
-{
-  memset(packet, 0, sizeof(packet));
-  packet_len = sizeof(packet);
-  LDU_recv(&loc_comm_params, (char *)packet, &packet_len, (uint32_t)5000);
-
-  String packet_s = String((char *)packet);
-  Serial.println(packet_s);
-
-  uint16_t header;
-  if(packet_len != 0)
-  {
-    Serial.println("LEN OK");
-    if(LDU_parsePacket(&loc_comm_params, packet, packet_len, &header) == LDU_OK)
-    {
-      Serial.println("Parse OK");
-      if (header == SENSOR_MAC_ADDRESS_REQUEST_HEADER)
-      {
-        Serial.println("MAC REQ");
-        LDU_sendBLEMAC(&loc_comm_params, gateaway_mac);
-      }
-      else if (header == SENSOR_DATA_REQUEST_HEADER)
-      {
-        Serial.println("DATA REQ");
-        sensor_data sd;
-      
-        getSensorData(&sd, &jc.sc);
-        printSensorData(&sd, &jc.sc);
-
-        sensor_data_packet[0] = jc.sc.number_of_sensors_bytes;
-
-        convertToSensorDataArray(&sensor_data_packet[1], 255, &sensor_data_packet_length, &sd, &jc.sc);
-        sensor_data_packet_length += 1;
-
-        LDU_sendSensorData(&loc_comm_params, sensor_data_packet, sensor_data_packet_length);
-      }
-    }
-  }
-}
-*/
-#endif
